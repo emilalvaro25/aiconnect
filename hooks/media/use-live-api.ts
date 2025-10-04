@@ -20,7 +20,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { GenAILiveClient } from '../../lib/genai-live-client';
-import { LiveConnectConfig, LiveServerToolCall, GoogleGenAI, Chat } from '@google/genai';
+import { LiveConnectConfig, GoogleGenAI, Chat } from '@google/genai';
 import { AudioStreamer } from '../../lib/audio-streamer';
 import { audioContext } from '../../lib/utils';
 import VolMeterWorket from '../../lib/worklets/vol-meter';
@@ -114,54 +114,12 @@ export function useLiveApi({
     client.on('interrupted', stopAudioStreamer);
     client.on('audio', onAudio);
 
-    const onToolCall = (toolCall: LiveServerToolCall) => {
-      const functionResponses: any[] = [];
-
-      for (const fc of toolCall.functionCalls) {
-        // Log the function call trigger
-        const triggerMessage = `Triggering function call: **${
-          fc.name
-        }**\n\`\`\`json\n${JSON.stringify(fc.args, null, 2)}\n\`\`\``;
-        useLogStore.getState().addTurn({
-          role: 'system',
-          text: triggerMessage,
-          isFinal: true,
-        });
-
-        // Prepare the response
-        functionResponses.push({
-          id: fc.id,
-          name: fc.name,
-          response: { result: 'ok' }, // simple, hard-coded function response
-        });
-      }
-
-      // Log the function call response
-      if (functionResponses.length > 0) {
-        const responseMessage = `Function call response:\n\`\`\`json\n${JSON.stringify(
-          functionResponses,
-          null,
-          2,
-        )}\n\`\`\``;
-        useLogStore.getState().addTurn({
-          role: 'system',
-          text: responseMessage,
-          isFinal: true,
-        });
-      }
-
-      client.sendToolResponse({ functionResponses: functionResponses });
-    };
-
-    client.on('toolcall', onToolCall);
-
     return () => {
       // Clean up event listeners
       client.off('open', onOpen);
       client.off('close', onClose);
       client.off('interrupted', stopAudioStreamer);
       client.off('audio', onAudio);
-      client.off('toolcall', onToolCall);
     };
   }, [client]);
 

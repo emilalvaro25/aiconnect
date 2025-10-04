@@ -9,7 +9,6 @@ import { useLiveAPIContext } from '../../../contexts/LiveAPIContext';
 import {
   useSettings,
   useLogStore,
-  useTools,
   ConversationTurn,
 } from '@/lib/state';
 
@@ -42,25 +41,12 @@ const renderContent = (text: string) => {
 export default function StreamingConsole() {
   const { client, setConfig } = useLiveAPIContext();
   const { systemPrompt, voice } = useSettings();
-  const { tools } = useTools();
   const turns = useLogStore(state => state.turns);
   const isAgentTyping = useLogStore(state => state.isAgentTyping);
   const scrollRef = useRef<HTMLDivElement>(null);
 
   // Set the configuration for the Live API
   useEffect(() => {
-    const enabledTools = tools
-      .filter(tool => tool.isEnabled)
-      .map(tool => ({
-        functionDeclarations: [
-          {
-            name: tool.name,
-            description: tool.description,
-            parameters: tool.parameters,
-          },
-        ],
-      }));
-
     // Using `any` for config to accommodate `speechConfig`, which is not in the
     // current TS definitions but is used in the working reference example.
     const config: any = {
@@ -74,7 +60,6 @@ export default function StreamingConsole() {
       },
       inputAudioTranscription: {},
       outputAudioTranscription: {},
-      tools: enabledTools,
     };
 
     if (systemPrompt) {
@@ -82,7 +67,7 @@ export default function StreamingConsole() {
     }
 
     setConfig(config);
-  }, [setConfig, systemPrompt, tools, voice]);
+  }, [setConfig, systemPrompt, voice]);
 
   useEffect(() => {
     const { addTurn, updateLastTurn } = useLogStore.getState();
