@@ -4,7 +4,9 @@
 */
 import { create } from 'zustand';
 import { DEFAULT_LIVE_API_MODEL, DEFAULT_VOICE } from './constants';
-import { FunctionDeclaration, FunctionResponseScheduling } from '@google/genai';
+// FIX: The FunctionDeclaration type from @google/genai seems to be causing issues.
+// We will define the FunctionCall interface structure manually.
+import { FunctionResponseScheduling } from '@google/genai';
 
 /**
  * Settings
@@ -84,7 +86,21 @@ export interface ConversationTurn {
 }
 
 // FIX: Define and export the FunctionCall interface.
-export interface FunctionCall extends FunctionDeclaration {
+// This defines the schema for tool parameters.
+interface ToolSchema {
+  type: string;
+  description?: string;
+  properties?: {
+    [key: string]: ToolSchema;
+  };
+  items?: ToolSchema;
+  required?: string[];
+}
+
+export interface FunctionCall {
+  name: string;
+  description?: string;
+  parameters?: ToolSchema;
   isEnabled: boolean;
   scheduling: FunctionResponseScheduling;
 }

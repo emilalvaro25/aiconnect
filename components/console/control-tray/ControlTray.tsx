@@ -98,23 +98,22 @@ export default function ControlTray() {
           onKeyDown={handleKeyDown}
           disabled={connected}
         />
-        <button 
-          className="icon-button" 
+        <button
+          className="icon-button"
           aria-label="Send message"
           onClick={handleSend}
-          disabled={!inputValue.trim()}
+          disabled={!inputValue.trim() || connected}
         >
           <span className="icon">send</span>
         </button>
+        <button
+          className={cn('icon-button', { active: connected })}
+          onClick={handleMicClick}
+          aria-label={connected ? 'Stop listening' : 'Start listening'}
+        >
+          <span className="icon">mic</span>
+        </button>
       </div>
-
-      <button
-        className={cn('voice-button', { active: connected })}
-        onClick={handleMicClick}
-        aria-label={connected ? 'Stop listening' : 'Start listening'}
-      >
-        <span className="icon">graphic_eq</span>
-      </button>
     </section>
   );
 }
